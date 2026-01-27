@@ -1,0 +1,7 @@
+tests:
+  app.sum:
+    platform_allow:
+      - qemu_x86
+    tags:
+      - unit
+
