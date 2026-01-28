@@ -1,0 +1,22 @@
+{
+  "name": "Zephyr Dev",
+  "image": "ghcr.io/zephyrproject-rtos/zephyr-build:main",
+
+  "workspaceFolder": "/workdir",
+  "workspaceMount": "source=${localWorkspaceFolder}/..,target=/workdir,type=bind",
+
+  "remoteUser": "user",
+
+  "postCreateCommand": "ln -sf /workdir/dongle-bridge/.vscode /workdir/.vscode",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "marus25.cortex-debug",
+        "twxs.cmake"
+      ]
+    }
+  }
+}

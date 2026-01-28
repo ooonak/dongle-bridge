@@ -1,0 +1,56 @@
+{
+    "version": "2.0.0",
+
+    "inputs": [
+        {
+        "id": "board",
+        "type": "pickString",
+        "description": "Select Zephyr board",
+        "options": [
+            "native_sim",
+            "native_posix_64",
+            "qemu_cortex_m3",
+            "nrf52840dongle"
+        ],
+        "default": "native_sim"
+        }
+    ],
+
+    "tasks": [
+        {
+            "label": "Build (${input:board})",
+            "type": "shell",
+            "command": "west build -b ${input:board} app --pristine",
+            "options": {
+                "cwd": "${workspaceFolder}/dongle-bridge"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "Test (${input:board})",
+            "type": "shell",
+            "command": "west build -t run",
+            "options": {
+                "cwd": "${workspaceFolder}/dongle-bridge"
+            },
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "Test (twister)",
+            "type": "shell",
+            "command": "twister -v -p native_sim -p native_posix_64 -p qemu_cortex_m3 -T app/tests",
+            "options": {
+                "cwd": "${workspaceFolder}/dongle-bridge"
+            },
+            "group": "test",
+            "problemMatcher": []
+        }
+    ]
+}
