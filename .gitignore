@@ -1,7 +1,12 @@
 # editors
-.vscode
 *.swp
 *~
+
+# Ignore everything in .vscode by default
+.vscode/*
+
+# But keep tasks.json
+!.vscode/tasks.json
 
 # python
 .venv

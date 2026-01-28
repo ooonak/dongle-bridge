@@ -7,7 +7,8 @@
 
   "remoteUser": "user",
 
-  "postCreateCommand": "ln -sf /workdir/dongle-bridge/.vscode /workdir/.vscode",
+  "postCreateCommand": "ln -sf dongle-bridge/.vscode .vscode",
+  "postStartCommand": "ln -sf dongle-bridge/.vscode .vscode",
 
   "customizations": {
     "vscode": {
