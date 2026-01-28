@@ -1,4 +1,4 @@
-name: Zephyr Build & Test v4.3 (pinned)
+name: Zephyr Build & Test v4.3
 
 on:
   push:
@@ -7,20 +7,45 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/org/zephyr-slim-ci:latest
+
+    env:
+      # Make sure west cache directory is consistent
+      WEST_CACHE_DIR: ${{ github.workspace }}/.west
 
     steps:
+      # --- Checkout the repo into 'app' folder ---
       - name: Checkout code
         uses: actions/checkout@v4
         with:
           path: app
 
+      # --- Set up Python 3.12 ---
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.12
 
+      # --- Cache Zephyr SDK ---
+      - name: Cache Zephyr SDK
+        uses: actions/cache@v3
+        id: sdk-cache
+        with:
+          path: ~/.zephyr-sdk
+          key: zephyr-sdk-0.15.2
+          restore-keys: |
+            zephyr-sdk-0.15.2
+
+      # --- Cache west modules ---
+      - name: Cache west workspace
+        uses: actions/cache@v3
+        id: west-cache
+        with:
+          path: ${{ env.WEST_CACHE_DIR }}
+          key: west-cache-${{ github.sha }}
+          restore-keys: |
+            west-cache-
+
+      # --- Setup Zephyr environment ---
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
@@ -28,20 +53,26 @@ jobs:
           toolchains: arm-zephyr-eabi
           sdk-version: 0.15.2
 
-      - name: Initialize west workspace
+      # --- Initialize west workspace (reads your west.yml) ---
+      - name: Initialize west
         run: |
           cd app
           west init -l .
           west update
 
+      # --- Build native_sim ---
       - name: Build native_sim
         run: west build -p -b native_sim app
 
+      # --- Quick run native_sim (5s timeout) ---
       - name: Run native_sim
         run: timeout 5 ./app/build/zephyr/zephyr
 
+      # --- Run native_sim tests with Twister ---
       - name: Run native_sim tests
         run: west twister -p native_sim app
 
+      # --- Build nRF52840 Dongle ---
       - name: Build nRF52840 Dongle
         run: west build -p -b nrf52840dk_nrf52840 app
+
