@@ -1,7 +1,7 @@
 tests:
   app.sum:
     platform_allow:
-      - qemu_x86
+      - native_sim
     tags:
       - unit
 
