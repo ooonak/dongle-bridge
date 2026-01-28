@@ -1,0 +1,47 @@
+name: Zephyr Build & Test v4.3 (pinned)
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/org/zephyr-slim-ci:latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: app
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+
+      - name: Setup Zephyr project
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: app
+          toolchains: arm-zephyr-eabi
+          sdk-version: 0.15.2
+
+      - name: Initialize west workspace
+        run: |
+          cd app
+          west init -l .
+          west update
+
+      - name: Build native_sim
+        run: west build -p -b native_sim app
+
+      - name: Run native_sim
+        run: timeout 5 ./app/build/zephyr/zephyr
+
+      - name: Run native_sim tests
+        run: west twister -p native_sim app
+
+      - name: Build nRF52840 Dongle
+        run: west build -p -b nrf52840dk_nrf52840 app
