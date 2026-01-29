@@ -80,8 +80,8 @@ jobs:
       - name: Run native_sim
         run: |
           cd applications
-          find . -type f -name zephyr.exe
-          timeout 5 ./app/build/zephyr/zephyr.exe
+          echo "Inside $(pwd) - found: $(find . -type f -name zephyr.exe)"
+          timeout 5 ./build/zephyr/zephyr.exe
 
       # --- Run native_sim tests with Twister ---
       - name: Run native_sim tests
