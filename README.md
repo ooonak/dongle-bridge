@@ -1,3 +1,5 @@
+[![Zephyr Build & Test v4.3](https://github.com/ooonak/dongle-bridge/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/ooonak/dongle-bridge/actions/workflows/build_and_test.yml)
+
 # dongle-bridge
 Zephyr application implementing an USB to BLE bridge
 
