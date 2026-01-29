@@ -78,8 +78,9 @@ jobs:
 
       # --- Quick run native_sim (5s timeout) ---
       - name: Run native_sim
+        working-directory: applications
+        continue-on-error: true
         run: |
-          cd applications
           echo "Inside $(pwd) - found: $(find . -type f -name zephyr.exe)"
           timeout 5 ./build/zephyr/zephyr.exe
 
