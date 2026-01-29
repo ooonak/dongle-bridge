@@ -88,7 +88,7 @@ jobs:
       - name: Run native_sim tests
         working-directory: applications
         run: |
-          west twister -p native_sim .
+          west twister -v -p native_sim -T app/tests
 
       # --- Build nRF52840 Dongle ---
       - name: Build nRF52840 Dongle
