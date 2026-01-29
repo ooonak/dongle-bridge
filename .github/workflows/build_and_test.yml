@@ -1,3 +1,16 @@
+# An application located within a workspace, but outside the zephyr repository
+# itself, is referred to as a Zephyr workspace application.
+# zephyrproject/
+# ├─── .west/
+# │    └─── config
+# ├─── zephyr/
+# ├─── bootloader/
+# ├─── modules/
+# ├─── tools/
+# ├─── <vendor/private-repositories>/
+# └─── applications/
+#      └── app/
+
 name: Zephyr Build & Test v4.3
 
 on:
@@ -13,7 +26,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          path: app  # your repo root will be in $GITHUB_WORKSPACE/app
+          path: applications  # your repo root will be in $GITHUB_WORKSPACE/applications
 
       # --- Set up Python 3.12 ---
       - name: Set up Python
@@ -44,13 +57,13 @@ jobs:
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
-          app-path: app
+          app-path: applications
           toolchains: arm-zephyr-eabi:x86_64-zephyr-elf
 
       # --- Initialize west workspace ---
       - name: Initialize west
         run: |
-          cd app
+          cd applications
           # Only initialize if workspace metadata does not exist
           if [ ! -d "$GITHUB_WORKSPACE/.west" ]; then
             west init -l .
@@ -68,23 +81,23 @@ jobs:
       # --- Build native_sim (workspace application) ---
       - name: Build native_sim
         run: |
-          cd app
+          cd applications
           west build -p -b native_sim app
 
       # --- Quick run native_sim (5s timeout) ---
       - name: Run native_sim
         run: |
-          cd app
+          cd applications
           timeout 5 .app/build/zephyr/zephyr
 
       # --- Run native_sim tests with Twister ---
       - name: Run native_sim tests
         run: |
-          cd app
+          cd applications
           west twister -p native_sim app
 
       # --- Build nRF52840 Dongle ---
       - name: Build nRF52840 Dongle
         run: |
-          cd app
+          cd applications
           west build -p -b nrf52840dongle app
