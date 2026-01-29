@@ -6,15 +6,20 @@
 
 cmake_minimum_required(VERSION 3.13.1)
 
+project(app LANGUAGES C)
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 
-project(app LANGUAGES C)
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Include app headers
 zephyr_include_directories(include)
 
 # Include app sources
 target_sources(app PRIVATE src/main.c src/sum.c)
+
+include(cmake/flags.cmake)
 
 # The code below locates the git index file for this repository and adds it as a dependency for
 # the application VERSION file so that if the repo has a new commit added, even if no files in

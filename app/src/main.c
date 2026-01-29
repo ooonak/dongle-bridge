@@ -1,5 +1,6 @@
 #include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
+#include <stdio.h>
 #include "sum.h"
 
 LOG_MODULE_REGISTER(app);
