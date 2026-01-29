@@ -57,26 +57,34 @@ jobs:
           fi
           west update
 
+      # --- Debug folders ---
+      - name: List directories
+        run: |
+          cd $GITHUB_WORKSPACE
+          pwd
+          ls -R .
+          cd -
+
       # --- Build native_sim (workspace application) ---
       - name: Build native_sim
         run: |
           cd app
-          west build -p -b native_sim .
+          west build -p -b native_sim app
 
       # --- Quick run native_sim (5s timeout) ---
       - name: Run native_sim
         run: |
           cd app
-          timeout 5 ./build/zephyr/zephyr
+          timeout 5 .app/build/zephyr/zephyr
 
       # --- Run native_sim tests with Twister ---
       - name: Run native_sim tests
         run: |
           cd app
-          west twister -p native_sim .
+          west twister -p native_sim app
 
       # --- Build nRF52840 Dongle ---
       - name: Build nRF52840 Dongle
         run: |
           cd app
-          west build -p -b nrf52840dongle .
+          west build -p -b nrf52840dongle app
