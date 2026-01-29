@@ -70,14 +70,6 @@ jobs:
           fi
           west update
 
-      # --- Debug folders ---
-      - name: List directories
-        run: |
-          cd $GITHUB_WORKSPACE
-          pwd
-          ls -R .
-          cd -
-
       # --- Build native_sim (workspace application) ---
       - name: Build native_sim
         run: |
@@ -88,7 +80,8 @@ jobs:
       - name: Run native_sim
         run: |
           cd applications
-          timeout 5 ./app/build/native_sim/zephyr/zephyr.exe
+          find . -type f -name zephyr.exe
+          timeout 5 ./app/build/zephyr/zephyr.exe
 
       # --- Run native_sim tests with Twister ---
       - name: Run native_sim tests
