@@ -1,0 +1,59 @@
+{
+  "version": "2.0.0",
+
+  "tasks": [
+    {
+      "label": "Clean & Build (native_sim)",
+      "type": "shell",
+      "command": "west build -b native_sim -d build/native_sim app --pristine",
+      "options": {
+        "cwd": "${workspaceFolder}/dongle-bridge"
+      },
+      "group": "build",
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Build (native_sim)",
+      "type": "shell",
+      "command": "test -d build/native_sim || west build -b native_sim -d build/native_sim app --pristine; west build -d build/native_sim",
+      "options": {
+        "cwd": "${workspaceFolder}/dongle-bridge"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$gcc"]
+    },
+    {
+      "label": "Run (native_sim)",
+      "type": "shell",
+      "command": "west build -d build/native_sim -t run",
+      "options": {
+        "cwd": "${workspaceFolder}/dongle-bridge"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Test (twister, native_sim)",
+      "type": "shell",
+      "command": "west twister -v -p native_sim -T app/tests",
+      "options": {
+        "cwd": "${workspaceFolder}/dongle-bridge"
+      },
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Build (nrf52840dongle)",
+      "type": "shell",
+      "command": "west build -b nrf52840dongle -d build/nrf52840dongle app",
+      "options": {
+        "cwd": "${workspaceFolder}/dongle-bridge"
+      },
+      "group": "build",
+      "problemMatcher": ["$gcc"]
+    }
+  ]
+}

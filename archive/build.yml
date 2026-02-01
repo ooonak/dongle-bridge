@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+  pull_request:
+  #schedule:
+  #  - cron: "0 0 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build app and tests
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+      options: --user user
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: dongle-bridge
+          persist-credentials: false
+
+#      - name: Cache west modules
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            dongle-bridge/modules
+#            dongle-bridge/.west
+#          key: west-modules-${{ hashFiles('dongle-bridge/west.yml') }}
+#          restore-keys: |
+#            west-modules-
+
+      - name: Initialize west and update
+        working-directory: dongle-bridge
+        run: |
+          west init -l .
+          west update
+
+      - name: Build
+        working-directory: dongle-bridge
+        run: |
+          west build -b qemu_x86 -DCONFIG_CI_BUILD=y
+
+      - name: Build and test with twister
+        working-directory: dongle-bridge
+        run: |
+          west twister -T app -v --inline-logs --integration

@@ -1,0 +1,56 @@
+name: Zephyr Main CI
+
+on:
+  workflow_dispatch:
+#  push:
+#    branches: [ main ]
+
+jobs:
+  native-sim:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          west init -l .
+          west update
+          west build -b native_sim -DCONFIG_CI_BUILD=y
+          ASAN_OPTIONS=detect_leaks=1 \
+            ./build/zephyr/zephyr.exe
+          valgrind --error-exitcode=1 ./build/zephyr/zephyr.exe
+
+  native-posix:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          west init -l .
+          west update
+          west build -b native_posix
+          ./build/zephyr/zephyr.exe
+
+  arm-nrf52840:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          west init -l .
+          west update
+          west build -b nrf52840dk_nrf52840
+
+  qemu:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          west init -l .
+          west update
+          west build -b qemu_x86
+

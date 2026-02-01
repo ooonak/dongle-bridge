@@ -1,0 +1,59 @@
+name: Zephyr PR CI
+
+on:
+  workflow_dispatch:
+#  pull_request:
+
+jobs:
+  native-sim:
+    name: native_sim (ASan/UBSan + static)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: West init
+        run: |
+          west init -l .
+          west update
+      - name: Build (strict)
+        run: |
+          west build -b native_sim -DCONFIG_CI_BUILD=y
+      - name: Run ASan/UBSan
+        run: |
+          ASAN_OPTIONS=detect_leaks=1 \
+          ./build/zephyr/zephyr.exe
+      - name: Static analysis
+        run: |
+          west build -b native_sim -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+          cppcheck --enable=all --error-exitcode=1 \
+            --project=build/compile_commands.json \
+            --suppress=missingIncludeSystem
+          scan-build --status-bugs west build -b native_sim
+          clang-tidy -p build
+
+  native-posix:
+    name: native_posix (network + TLS)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          west init -l .
+          west update
+          west build -b native_posix
+          ./build/zephyr/zephyr.exe
+
+  arm-nrf52840:
+    name: nRF52840 build (BLE + USB + ARM)
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          west init -l .
+          west update
+          west build -b nrf52840dk_nrf52840
+

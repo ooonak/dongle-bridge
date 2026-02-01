@@ -1,0 +1,67 @@
+name: Build & Push Zephyr CI Docker Image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Dockerfile'
+      - '.github/workflows/docker-publish.yml'   # optional if you want to trigger on workflow changes too
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Log in to GHCR
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Set Docker image tags
+      - name: Determine tags
+        id: tags
+        run: |
+          # Base image name
+          IMAGE_BASE=ghcr.io/${GITHUB_REPOSITORY}/zephyr-slim-ci
+          echo "IMAGE_BASE=${IMAGE_BASE}" >> $GITHUB_ENV
+
+          # Git tag or latest
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            VERSION_TAG=${GITHUB_REF_NAME}
+          else
+            VERSION_TAG=latest
+          fi
+          echo "VERSION_TAG=${VERSION_TAG}" >> $GITHUB_ENV
+
+          # CALVER: YYYY.MM.DD.n (n = GITHUB_RUN_NUMBER)
+          CALVER_TAG=$(date +%Y.%m.%d).${GITHUB_RUN_NUMBER}
+          echo "CALVER_TAG=${CALVER_TAG}" >> $GITHUB_ENV
+
+          echo "Using tags: latest/Version=${VERSION_TAG}/CALVER=${CALVER_TAG}"
+
+      # Build Docker image
+      - name: Build Docker image
+        run: |
+          docker build -t $IMAGE_BASE:latest -t $IMAGE_BASE:$VERSION_TAG -t $IMAGE_BASE:$CALVER_TAG .
+
+      # Push Docker image to GHCR
+      - name: Push Docker image
+        run: |
+          docker push $IMAGE_BASE:latest
+          docker push $IMAGE_BASE:$VERSION_TAG
+          docker push $IMAGE_BASE:$CALVER_TAG
+
