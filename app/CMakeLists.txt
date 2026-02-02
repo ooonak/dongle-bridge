@@ -18,8 +18,26 @@ include(cmake/flags.cmake)
 # Include app headers
 zephyr_include_directories(include)
 
+set(COMMON_SOURCES
+  src/core/app_core.c
+)
+
 # Include app sources
-target_sources(app PRIVATE src/main.c src/sum.c)
+if(CONFIG_NATIVE_SIM)
+  set(SOURCES
+    ${COMMON_SOURCES}
+    src/hal/usb/usb_cdc_mock.c
+    src/main/native/main.c
+  )
+else()
+    set(SOURCES
+    ${COMMON_SOURCES}
+    src/hal/usb/usb_cdc_hw.c
+    src/main/hw/main.c
+  )
+endif()
+
+target_sources(app PRIVATE ${SOURCES})
 
 # The code below locates the git index file for this repository and adds it as a dependency for
 # the application VERSION file so that if the repo has a new commit added, even if no files in
