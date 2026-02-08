@@ -1,7 +1,8 @@
 tests:
-  app.sum:
+  app_logic.unit:
     platform_allow:
       - native_sim
+    harness: ztest
     tags:
       - unit
-
+      - app_logic

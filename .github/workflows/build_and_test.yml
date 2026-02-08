@@ -70,19 +70,11 @@ jobs:
           fi
           west update
 
-      # --- Build native_sim (workspace application) ---
-      - name: Build native_sim
+      # --- Build nRF52840 Dongle ---
+      - name: Build nRF52840 Dongle
         working-directory: applications
         run: |
-          west build -p -b native_sim app
-
-      # --- Quick run native_sim (5s timeout) ---
-      - name: Run native_sim
-        working-directory: applications
-        continue-on-error: true
-        run: |
-          echo "Inside $(pwd) - found: $(find . -type f -name zephyr.exe)"
-          timeout 5 ./build/zephyr/zephyr.exe
+          west build -p -b nrf52840dongle app
 
       # --- Run native_sim tests with Twister ---
       - name: Run native_sim tests
@@ -91,17 +83,12 @@ jobs:
           west twister -v -p native_sim -T app/tests
 
       # --- Sanitizer build for native_sim ---
-      - name: Build native_sim with Address Sanitizer
+      - name: Build and run tests with Address Sanitizer
         working-directory: applications
         continue-on-error: true
         run: |
-          west build -p -b native_sim -d build/ci-native-asan app -- \
+          west build -p -b native_sim -d build/ci-native-asan app/tests/app_logic -- \
             -DZEPHYR_TOOLCHAIN_VARIANT=llvm \
-            -DEXTRA_CONF_FILE=overlays/sanitizers.conf
-          timeout 20 ./build/ci-native-asan/zephyr/zephyr.exe
-
-      # --- Build nRF52840 Dongle ---
-      - name: Build nRF52840 Dongle
-        working-directory: applications
-        run: |
-          west build -p -b nrf52840dongle app
+            -DEXTRA_CONF_FILE=$(pwd)/overlays/sanitizers.conf \
+            -DSANITIZER_BUILD=1
+          west build -t run -d build/ci-native-asan

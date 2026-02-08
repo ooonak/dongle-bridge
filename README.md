@@ -7,12 +7,15 @@ Zephyr application implementing an USB to BLE bridge
 
 ```
 $ docker run -ti -v <path>/zephyrproject:/workdir ghcr.io/zephyrproject-rtos/zephyr-build:main
-$ cd dongle-bridge/
+$ cd dongle-bridge
 
-$ west build -b qemu_x86 app --pristine
-$ west build -b nrf52840dongle app --pristine
+# Build for target
+$ west build -p -b nrf52840dongle app
 
+# Build and run test by hand
+$ west build -b native_sim app/tests/app_logic
 $ west build -t run
 
-$ west twister -T app -v --integration
+# Or with Twister
+$ west twister -v -p native_sim -T app/tests
 ```
